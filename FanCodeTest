@@ -1,0 +1,41 @@
+import java.util.ArrayList;
+import java.util.List;
+import org.testng.Assert;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+import io.restassured.RestAssured;
+import io.restassured.response.Response;
+import java.util.List;
+import static io.restassured.RestAssured.given;
+
+public class FanCodeTest {
+
+    @BeforeClass
+    public void URL() 
+    {
+        RestAssured.baseURI = "http://jsonplaceholder.typicode.com";
+    }
+
+    @Test
+    public void ToDoCompletionCheck() 
+    {
+        Response response = given().get("/users"); //Getting all user data list
+        List<User> users = response.jsonPath().getList("", User.class);
+        List<User> fancodeUsers = UserUtil.filterUsersByFanCodeCity(users); //Filterng user data of fan code city
+        Assert.assertTrue(fancodeUsers.size() > 0, "No users found from FanCode city");
+
+        // completion of user percentage
+        for (User user : fancodeUsers) {
+            Response todoResponse = given().param("userId", user.getId()).get("/todos");
+            List<Todo> todos = todoResponse.jsonPath().getList("", Todo.class);
+
+            Assert.assertTrue(todos.size() > 0, "No todos found for user " + user.getId());
+
+            int totalTasks = todos.size();
+            long completedTasks = todos.stream().filter(Todo::isCompleted).count();
+            double completionPercentage = (completedTasks / (double) totalTasks) * 100;
+
+            Assert.assertTrue(completionPercentage > 50, "Completion percentage less than 50% for user " + user.getId());
+        }
+    }
+}
