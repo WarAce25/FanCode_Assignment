@@ -1,0 +1,22 @@
+import java.util.ArrayList;
+import java.util.List;
+
+public class UserUtil {
+
+    public static List<User> filterUsersByFanCodeCity(List<User> users)
+    {
+        List<User> fancodeUsers = new ArrayList();
+        for (User user : users) {
+            if (isInFanCodeCity(user)) {
+                fancodeUsers.add(user);
+            }
+        }
+        return fancodeUsers;
+    }
+
+    private static boolean isInFanCodeCity(User user) {
+        double lat = user.getAddress().getGeo().getLat();
+        double lng = user.getAddress().getGeo().getLng();
+        return (-40 <= lat && lat <= 5) && (5 <= lng && lng <= 100);
+    }
+}
